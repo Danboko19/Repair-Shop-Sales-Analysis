@@ -10,17 +10,23 @@ car.csv: It shown the information of each car that was worked on in the shop, su
 Part.csv: It detailed the part used in each services performed ,there cost for each and the revenue generated from each part.
 ### Data Preparation
 I created tables according to the data about to be imported to mysql workbench using the following queries.
+
 _create database da_abiodunuthmanamusat;
+
 create table Customer(CustomerID int not null primary key auto_increment,
 Name varchar(70), Address Varchar(150), phone text);
+
 create table Invvoice (InvoiceID int not null,InvoiceDate datetime,
 Subtotal float,SalesTaxRate Int, SalesTax float,TotalLabour Int,
 TotalParts float, Total float, CustomerID int, VehicleID Int);
+
 Create table Vehicles(VehicleID Int Not Null primary key auto_increment,
 Make varChar(20),Model varchar(20),Year int, Color text,Vin text,
 RegNumber Text,Mileage Int, OwnnerName Text);
+
 create table Job(JobId Int primary key,VehicleId Int, Description varchar(100),
 Hours float,Rate Int,Amount float,InvoiceID Int);
+
 Create Table Parts(PartId Int Not null primary key, JobId int,PartNumber Varchar(25),
 PartName Text,Quantity Int,UnitPrice float,Amount float, InvoiceId Int);_
 After which all the data were successfully imported using data import/export wizard.
@@ -112,4 +118,135 @@ Total revenue generated per month from job and part sales
 
 ### Conclusion
 
-The analysis of the car repair shop's operations has provided valuable insights into customer behavior, vehicle trends, job performance, parts usage, and financial health. Key findings include the identification of top customers, common vehicle types, and high-demand services and parts. By implementing the recommended optimizations, the repair shop can enhance operational efficiency, improve customer satisfaction, and increase profitability. Continued analysis and data-driven decision-making will be essential for sustaining these improvements and adapting to future changes in the market.
+The analysis of the car repair shop's operations has provided valuable insights into customer behavior, vehicle trends, job performance, parts usage, and financial health. Key findings include the identification of top customers, common vehicle types, and high-demand services and parts. By implementing the recommended optimizations, the repair shop can enhance operational efficiency, improve customer satisfaction, and increase profitability. Continued analysis and data-driven decision-making will be essential for sustaining these improvements and adapting to future changes in the market.\
+## References
+### The Dashboard 
+![dashboard](https://github.com/user-attachments/assets/3634a01f-3e15-4824-99a5-9447c38316c0)
+
+### The sqlqueries:[Uploadicreate table Customer(CustomerID int not null primary key auto_increment,
+ Name varchar(70), Address Varchar(150), phone text);
+ create table Invvoice(InvoiceID int not null,InvoiceDate datetime,
+ Subtotal float,SalesTaxRate Int, SalesTax float,TotalLabour Int,
+ TotalParts float, Total float, CustomerID int, VehicleID Int);
+ Create table Vehicles(VehicleID Int Not Null primary key auto_increment,
+ Make varChar(20),Model varchar(20),Year int, Color text,Vin text,
+ RegNumber Text,Mileage Int, OwnnerName Text);
+ create table Job(JobId Int primary key,VehicleId Int, Description varchar(100),
+	Hours float,Rate Int,Amount float,InvoiceID Int);
+Create Table Parts(PartId Int Not null primary key, JobId int,PartNumber Varchar(25),
+	PartName Text,Quantity Int,UnitPrice float,Amount float, InvoiceId Int);
+--  2 Data Analysis Tasks
+--     a. Customer Analysis:
+--         - Identify the top 5 customers who have spent the most on vehicle repairs and parts.
+select Name, sum(Amount) as amount_spent_vehicles_Repair
+from customer
+right join invvoice on customer.customerID=invvoice.customerID
+right join job on invvoice.vehicleID=job.VehicleId
+group by Name
+order by amount_spent_vehicles_Repair desc;
+
+select Name, round(sum(Amount),2) as amount_spent_part
+from customer
+right join invvoice on customer.customerID=invvoice.customerID
+right join parts on invvoice.InvoiceID=parts.InvoiceID
+group by Name
+order by amount_spent_part desc;
+## - Determine the average spending of customers on repairs and parts.
+select Name, round(avg(Amount),2) as average_spent_vehicles_Repair
+from customer
+right join invvoice on customer.customerID=invvoice.customerID
+right join job on invvoice.vehicleID=job.VehicleId
+group by Name
+order by average_spent_vehicles_Repair desc;
+
+select Name, round(avg(Amount),2) as average_spent_part
+from customer
+right join invvoice on customer.customerID=invvoice.customerID
+right join parts on invvoice.InvoiceID=parts.InvoiceID
+group by Name
+order by average_spent_part desc;
+
+##  - Analyze the frequency of customer visits and identify any patterns.
+select Name, count(job.vehicleID)  as Visit_Time
+from customer 
+right join invvoice on customer.customerID=invvoice.customerID
+right join job on invvoice.InvoiceID=job.InvoiceID
+group by Name;
+##  b. Vehicle Analysis:
+## Calculate the average mileage of vehicles serviced
+select round(avg(mileage)) as avg_milegae
+from vehicles;
+
+## - Identify the most common vehicle makes and models brought in for service.
+select Make, Model,count(jobID) as Total_service_time
+from job
+right join vehicles on job.VehicleId=vehicles.vehicleID
+group by Make, Model
+order by Total_service_time desc
+limit 1;
+
+--  - Analyze the distribution of vehicle ages and 
+--   identify any trends in service requirements based on vehicle age.
+select Make, model,(2024-year) as age, Description
+from vehicles
+right join job on vehicles.VehicleID=job.vehicleid;
+--     c. Job Performance Analysis:
+--   - Determine the most common types of jobs performed and their frequency.
+select description, count(description) as frequency
+from job
+group by Description
+order by frequency desc
+Limit 1;
+--         - Calculate the total revenue generated from each type of job.
+select description, sum(amount) as revenue
+from job
+group by Description;
+--         - Identify the jobs with the highest and lowest average costs.
+select description, avg(amount) as average_cost
+from job
+group by Description
+order by average_cost desc
+limit 1;
+select description, avg(amount) as average_cost
+from job
+group by Description
+order by average_cost asc
+limit 1;
+--     d. Parts Usage Analysis:
+--         - List the top 5 most frequently used parts and their total usage.
+Select partname, sum(Quantity) as Total_usage
+from parts
+group by partname
+order by Total_usage desc
+limit 5;
+--         - Calculate the average cost of parts used in repairs.
+select round(avg(amount),2) as average_part_cost
+from parts;
+--  Determine the total revenue generated from parts sales
+select round(sum(amount),2) as Total_Revenue
+from Parts;
+--     e. Financial Analysis:
+--         - Calculate the total revenue generated from labor and parts for each month.
+select  month(invoicedate) as Month, round(sum(p.amount),2) as Revenue_on_part, 
+round(sum(j.amount),2) as revenue_on_job
+from invvoice Iv
+right join job j on iv.vehicleID=j.VehicleId
+right join parts p on j.JobId=p.JobId
+group by month;
+select  month(invoicedate) as Month, round(sum(totallabour),2) as revenue_on_job,
+round(sum(totalparts),2) as revenue_on_part
+from invvoice Iv
+right join job j on iv.vehicleID=j.VehicleId
+right join parts p on j.JobId=p.JobId
+group by month;
+--         - Determine the overall profitability of the repair shop.
+
+--         - Analyze the impact of sales tax on the total revenue.
+select round(sum(total),2) as total_revenue, round((sum(total)*0.13),2) as tax_impact
+from invvoice;
+
+
+  
+    ng Invoice.sql…]()
+
+
