@@ -96,7 +96,8 @@ Total revenue generated per month from job and part sales
 #### Overall profitability of the repair shop
 
 #### Sales Tax Impact on the Revenue generated
-![Tax Impact](https://github.com/user-attachments/assets/8a648180-dbbd-4cbf-99a2-5228f1983808)
+![dashboard](https://github.com/user-attachments/assets/d2a3ec45-9654-4d15-b87f-c4527644efc6)
+
 
 ### Optimization Recommendations
 
