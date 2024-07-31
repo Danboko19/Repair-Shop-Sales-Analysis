@@ -126,7 +126,7 @@ The analysis of the car repair shop's operations has provided valuable insights 
 
 ### The sqlqueries:
 
-### Datavase Creation
+### Database Creation
 CREATE DATABASE da_abiodunuthmanamusat;
 
 ### Tabe Creation
